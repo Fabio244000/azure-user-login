@@ -1,0 +1,52 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    command: "azurite-queue --queueHost 0.0.0.0 --queuePort 10001 --location /data --skipApiVersionCheck"
+    ports:
+      - "10001:10001"
+    volumes:
+      - azurite_data:/data
+
+  sms-worker:
+    build: .
+    command: python -m app.worker
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - azurite
+
+volumes:
+  postgres_data:
+  azurite_data:

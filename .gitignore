@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+
+# Env vars
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# Tooling caches
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# cluade.md
+CLAUDE.md
