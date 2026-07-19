@@ -57,10 +57,16 @@ jobs:
 
       - name: Run tests
         run: |
-          # test_azure_sms_queue.py needs a real Azure Storage Queue (Azurite
-          # locally). It already runs as part of `docker compose exec app
-          # pytest` in local dev; excluded here for now.
-          pytest --ignore=tests/unit/infrastructure/messaging
+          # These need a real Azure Storage Queue (Azurite locally): the
+          # messaging adapter test directly, and the password-reset e2e
+          # tests indirectly (reset-request publishes to the queue, and
+          # update-password's setup calls reset-request). All of them
+          # already run as part of `docker compose exec app pytest` in
+          # local dev; excluded here since CI has no Azurite/queue backend.
+          pytest \
+            --ignore=tests/unit/infrastructure/messaging \
+            --ignore=tests/e2e/test_request_password_reset.py \
+            --ignore=tests/e2e/test_update_password.py
 
       - name: Package app
         run: zip -r app.zip . -x '.git/*' 'app.zip'
